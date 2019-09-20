@@ -32,7 +32,7 @@ output_filename = ('dl1_' + os.path.basename(input_file).split('.')[0] + '.h5')
 
 
 
-events = event_source(input_file, back_seekable=True, max_events=30)
+events = event_source(input_file, back_seekable=True, max_events=None)
 
 calibrator = CameraCalibrator()
 
@@ -216,6 +216,10 @@ if events.max_events is None:
 # plt.legend()
 # plt.xlim(-400, 400)
 # plt.ylim(-400, 400)
+
+
+
+
 
 # theta-square plot
 df_rec = pd.read_hdf(output_filename, key='events/reconstructed')
