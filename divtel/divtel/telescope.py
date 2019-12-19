@@ -26,12 +26,14 @@ class Telescope:
     def zenith(self):
         return Angle(np.pi/2.*u.rad) - self.alt
 
+    @property
     def fov(self):
         """
         Area of the field of view in rad**2
         """
         return u.Quantity(np.pi * (self.camera_radius / self.focal)**2, u.rad**2)
 
+    @property
     def position(self):
         return np.array([self.x.to(u.m).value, self.y.to(u.m).value, self.z.to(u.m).value]*u.m)
 
@@ -47,12 +49,13 @@ class Array:
         for ii, tel in enumerate(telescope_list):
             self.telescopes[ii+1] = tel
 
+    @property
     def positions_array(self):
-        return np.array([tel.position() for k, tel in self.telescopes.items()])
+        return np.array([tel.position for k, tel in self.telescopes.items()])
 
     def display(self, ax=None):
         ax = plt.gca() if ax is None else ax
-        ax.scatter(self.positions_array()[:,0], self.positions_array()[:,1])
+        ax.scatter(self.positions_array[:,0], self.positions_array[:,1])
         ax.set_xlabel('x [m]')
         ax.set_ylabel('y [m]')
 
@@ -66,10 +69,11 @@ def main():
     tel2 = Telescope(1 * u.m, 0 * u.m, 0 * u.m, 28 * u.m, 1 * u.m)
     tel3 = Telescope(0 * u.m, 1 * u.m, 0 * u.m, 28 * u.m, 1 * u.m)
 
-    print(tel1.position())
+    print(tel1.position)
+    print(tel1.zenith)
 
     array = Array([tel1, tel2, tel3])
-    print(array.positions_array())
+    print(array.positions_array)
 
     array.display()
     plt.show()
