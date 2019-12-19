@@ -53,12 +53,27 @@ class Array:
     def positions_array(self):
         return np.array([tel.position for k, tel in self.telescopes.items()])
 
-    def display(self, ax=None):
+    def display_positions(self, ax=None, **kwargs):
+        """
+        Display the array
+
+        Parameters
+        ----------
+        ax: `matplotlib.pyplot.axes`
+        kwargs: args for `pyplot.scatter`
+
+        Returns
+        -------
+        ax: `matplotlib.pyplot.axes`
+        """
         ax = plt.gca() if ax is None else ax
-        ax.scatter(self.positions_array[:,0], self.positions_array[:,1])
+        ax.scatter(self.positions_array[:,0], self.positions_array[:,1], **kwargs)
         ax.set_xlabel('x [m]')
         ax.set_ylabel('y [m]')
 
+    def display_3d(self):
+        #TODO: 3d representation of the array with the telescopes pointing
+        pass
 
 
 def main():
@@ -75,7 +90,7 @@ def main():
     array = Array([tel1, tel2, tel3])
     print(array.positions_array)
 
-    array.display()
+    array.display_positions()
     plt.show()
 
 
