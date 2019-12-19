@@ -1,16 +1,39 @@
+"""
+Functions to define telescopes pointings
+We use the same reference frame as simtel_array:
+X is pointing North
+Y is pointing East
+Z is pointing upward
+Az is taken clock-wise from X (towards Y) and between -180 and 180 degrees
+Alt is taken from ground (towards Z) and between -90 and 90 degrees
+"""
+
 import numpy as np
 import astropy.units as u
-from astropy.coordinates import Angle
 
 from telescope import Array, Telescope
 
 def alt_az_to_vector(alt, az):
+    """
+    Compute a pointing vector from an alt,az pointing direction
+
+    Parameters
+    ----------
+    alt: angle in rad
+    az: angle in rad
+
+    Returns
+    -------
+    np.array([x, y, z])
+    """
     x = np.cos(alt) * np.cos(az)
     y = np.cos(alt) * np.sin(az)
     z = np.sin(alt)
     return np.array([x, y, z])
 
+
 def retro_pointing(array, div, alt, az):
+
     B = array.barycenter
     norm = - np.log(div)
     Gx = B[0] - norm * np.cos(alt) * np.cos(az)
