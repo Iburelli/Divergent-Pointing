@@ -38,6 +38,10 @@ class Telescope:
         #TODO
         pass
 
+    @property
+    def pointing_vector(self):
+        return np.array([np.cos(self.alt)*np.cos(self.az), np.cos(self.alt)*np.sin(self.az), np.sin(self.az)])
+
 
 class Array:
 
@@ -50,6 +54,17 @@ class Array:
     @property
     def positions_array(self):
         return np.array([tel.position for k, tel in self.telescopes.items()])
+
+    @property
+    def pointing_vectors(self):
+        """
+        all telescopes pointing vectors as an array
+
+        Returns
+        -------
+        np.array
+        """
+        return np.array([tel.pointing_vector for key, tel in self.telescopes.items()])
 
     @property
     def barycenter(self):
@@ -69,8 +84,16 @@ class Array:
         ax: `matplotlib.pyplot.axes`
         """
         ax = plt.gca() if ax is None else ax
+        if 'color' not in kwargs:
+            kwargs['color'] = 'black'
         ax.scatter(self.positions_array[:, 1], self.positions_array[:, 0], **kwargs, label='telescopes')
         ax.scatter(self.barycenter[0], self.barycenter[1], marker='+', label='barycenter')
+        ax.quiver(self.positions_array[:, 1],
+                  self.positions_array[:, 0],
+                  self.pointing_vectors[:, 0],
+                  self.pointing_vectors[:, 1],
+                  color=kwargs['color']
+                  )
         ax.set_ylabel('x [m]')
         ax.set_xlabel('y [m]')
 
@@ -79,6 +102,7 @@ class Array:
     def display_3d(self):
         #TODO: 3d representation of the array with the telescopes pointing
         pass
+
 
 
 def main():
@@ -93,12 +117,16 @@ def main():
     print(tel1.zenith)
 
     array = Array([tel1, tel2, tel3])
+    for k, tel in array.telescopes.items():
+        tel.point_to_altaz(70*u.deg, 0*u.deg)
     print(array.positions_array)
     print(array.barycenter[0])
 
     ax = array.display_positions()
     ax.legend()
     plt.show()
+
+    print(array.pointing_vectors)
 
     # from visualization import polar_stuff
 
