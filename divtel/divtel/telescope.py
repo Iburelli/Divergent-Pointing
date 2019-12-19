@@ -1,6 +1,5 @@
 import numpy as np
 import astropy.units as u
-from astropy.coordinates import Angle
 import matplotlib.pyplot as plt
 
 
@@ -13,18 +12,16 @@ class Telescope:
         self.z = z.to(u.m)
         self.focal = focal.to(u.m)
         self.camera_radius = camera_radius.to(u.m)
-        self.alt = Angle(0*u.rad)
-        self.az = Angle(0*u.rad)
+        self.alt = u.Quantity(0, u.rad)
+        self.az = u.Quantity(0, u.rad)
 
     def point_to_altaz(self, alt, az):
-        assert type(alt)==Angle
-        assert type(az)==Angle
-        self.alt = alt
-        self.az = az
+        self.alt = alt.to(u.rad)
+        self.az = az.to(u.rad)
 
     @property
     def zenith(self):
-        return Angle(np.pi/2.*u.rad) - self.alt
+        return np.pi/2.*u.rad - self.alt
 
     @property
     def fov(self):
@@ -41,6 +38,7 @@ class Telescope:
         #TODO
         pass
 
+
 class Array:
 
     def __init__(self, telescope_list):
@@ -52,6 +50,10 @@ class Array:
     @property
     def positions_array(self):
         return np.array([tel.position for k, tel in self.telescopes.items()])
+
+    @property
+    def barycenter(self):
+        return self.positions_array.mean(axis=0)
 
     def display_positions(self, ax=None, **kwargs):
         """
@@ -67,7 +69,8 @@ class Array:
         ax: `matplotlib.pyplot.axes`
         """
         ax = plt.gca() if ax is None else ax
-        ax.scatter(self.positions_array[:,1], self.positions_array[:,0], **kwargs)
+        ax.scatter(self.positions_array[:, 1], self.positions_array[:, 0], **kwargs)
+        ax.scatter(self.barycenter[0], self.barycenter[1], label='barycenter')
         ax.set_ylabel('x [m]')
         ax.set_xlabel('y [m]')
 
@@ -89,9 +92,18 @@ def main():
 
     array = Array([tel1, tel2, tel3])
     print(array.positions_array)
+    print(array.barycenter[0])
 
     array.display_positions()
     plt.show()
+
+    # from visualization import polar_stuff
+
+    # tel1.point_to_altaz(70*u.deg, np.pi*u.rad)
+    # ax = polar_stuff(plt.figure(), tel1)
+    # ax.set_xlim(50, 80)
+    # ax.set_ylim(50, 90)
+    # plt.show()
 
 
 if __name__ == "__main__":
