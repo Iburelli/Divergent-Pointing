@@ -67,9 +67,9 @@ class Array:
         ax: `matplotlib.pyplot.axes`
         """
         ax = plt.gca() if ax is None else ax
-        ax.scatter(self.positions_array[:,0], self.positions_array[:,1], **kwargs)
-        ax.set_xlabel('x [m]')
-        ax.set_ylabel('y [m]')
+        ax.scatter(self.positions_array[:,1], self.positions_array[:,0], **kwargs)
+        ax.set_ylabel('x [m]')
+        ax.set_xlabel('y [m]')
 
     def display_3d(self):
         #TODO: 3d representation of the array with the telescopes pointing
