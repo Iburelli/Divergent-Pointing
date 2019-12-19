@@ -69,10 +69,12 @@ class Array:
         ax: `matplotlib.pyplot.axes`
         """
         ax = plt.gca() if ax is None else ax
-        ax.scatter(self.positions_array[:, 1], self.positions_array[:, 0], **kwargs)
-        ax.scatter(self.barycenter[0], self.barycenter[1], label='barycenter')
+        ax.scatter(self.positions_array[:, 1], self.positions_array[:, 0], **kwargs, label='telescopes')
+        ax.scatter(self.barycenter[0], self.barycenter[1], marker='+', label='barycenter')
         ax.set_ylabel('x [m]')
         ax.set_xlabel('y [m]')
+
+        return ax
 
     def display_3d(self):
         #TODO: 3d representation of the array with the telescopes pointing
@@ -94,7 +96,8 @@ def main():
     print(array.positions_array)
     print(array.barycenter[0])
 
-    array.display_positions()
+    ax = array.display_positions()
+    ax.legend()
     plt.show()
 
     # from visualization import polar_stuff
