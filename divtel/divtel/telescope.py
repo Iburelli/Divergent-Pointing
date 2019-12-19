@@ -90,12 +90,14 @@ class Array:
         ax.scatter(self.barycenter[0], self.barycenter[1], marker='+', label='barycenter')
         ax.quiver(self.positions_array[:, 1],
                   self.positions_array[:, 0],
-                  self.pointing_vectors[:, 0],
                   self.pointing_vectors[:, 1],
+                  self.pointing_vectors[:, 0],
                   color=kwargs['color']
                   )
         ax.set_ylabel('x [m]')
         ax.set_xlabel('y [m]')
+        ax.grid('on')
+        ax.axis('equal')
 
         return ax
 
@@ -119,6 +121,7 @@ def main():
     array = Array([tel1, tel2, tel3])
     for k, tel in array.telescopes.items():
         tel.point_to_altaz(70*u.deg, 0*u.deg)
+    tel2.point_to_altaz(0*u.deg, -90*u.deg)
     print(array.positions_array)
     print(array.barycenter[0])
 
