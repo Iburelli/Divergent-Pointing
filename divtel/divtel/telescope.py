@@ -40,7 +40,9 @@ class Telescope:
 
     @property
     def pointing_vector(self):
-        return np.array([np.cos(self.alt)*np.cos(self.az), np.cos(self.alt)*np.sin(self.az), np.sin(self.az)])
+        return np.array([np.cos(self.alt.to(u.rad))*np.cos(self.az.to(u.rad)),
+                         np.cos(self.alt.to(u.rad))*np.sin(self.az.to(u.rad)),
+                         np.sin(self.alt.to(u.rad))])
 
 
 class Array:
@@ -70,12 +72,14 @@ class Array:
     def barycenter(self):
         return self.positions_array.mean(axis=0)
 
-    def display_positions(self, ax=None, **kwargs):
+    def display_2d(self, projection='xy', ax=None, **kwargs):
         """
         Display the array
 
         Parameters
         ----------
+        projection: str
+            'xy', 'xz' or 'yz'
         ax: `matplotlib.pyplot.axes`
         kwargs: args for `pyplot.scatter`
 
@@ -86,16 +90,48 @@ class Array:
         ax = plt.gca() if ax is None else ax
         if 'color' not in kwargs:
             kwargs['color'] = 'black'
-        ax.scatter(self.positions_array[:, 1], self.positions_array[:, 0], **kwargs, label='telescopes')
-        ax.scatter(self.barycenter[0], self.barycenter[1], marker='+', label='barycenter')
-        ax.quiver(self.positions_array[:, 1],
-                  self.positions_array[:, 0],
-                  self.pointing_vectors[:, 1],
-                  self.pointing_vectors[:, 0],
+
+        if projection=='xy':
+            xx = self.positions_array[:, 1]
+            yy = self.positions_array[:, 0]
+            xb = self.barycenter[1]
+            yb = self.barycenter[0]
+            xv = self.pointing_vectors[:, 1]
+            yv = self.pointing_vectors[:, 0]
+            xlabel = 'y [m]'
+            ylabel = 'x [m]'
+
+        elif projection=='xz':
+            xx = self.positions_array[:, 0]
+            yy = self.positions_array[:, 2]
+            xb = self.barycenter[0]
+            yb = self.barycenter[2]
+            xv = self.pointing_vectors[:, 0]
+            yv = self.pointing_vectors[:, 2]
+            xlabel = 'x [m]'
+            ylabel = 'z [m]'
+
+        elif projection=='yz':
+            xx = self.positions_array[:, 1]
+            yy = self.positions_array[:, 2]
+            xb = self.barycenter[1]
+            yb = self.barycenter[2]
+            xv = self.pointing_vectors[:, 1]
+            yv = self.pointing_vectors[:, 2]
+            xlabel = 'y [m]'
+            ylabel = 'z [m]'
+
+        else:
+            breakpoint()
+
+
+        ax.scatter(xx, yy, **kwargs, label='telescopes')
+        ax.scatter(xb, yb, marker='+', label='barycenter')
+        ax.quiver(xx, yy, xv, yv,
                   color=kwargs['color']
                   )
-        ax.set_ylabel('x [m]')
-        ax.set_xlabel('y [m]')
+        ax.set_ylabel(ylabel)
+        ax.set_xlabel(xlabel)
         ax.grid('on')
         ax.axis('equal')
 
@@ -107,38 +143,3 @@ class Array:
 
 
 
-def main():
-    """
-    just to test things
-    """
-    tel1 = Telescope(0*u.m, 0*u.m, 0*u.m, 28*u.m, 1*u.m)
-    tel2 = Telescope(1 * u.m, 0 * u.m, 0 * u.m, 28 * u.m, 1 * u.m)
-    tel3 = Telescope(0 * u.m, 1 * u.m, 0 * u.m, 28 * u.m, 1 * u.m)
-
-    print(tel1.position)
-    print(tel1.zenith)
-
-    array = Array([tel1, tel2, tel3])
-    for k, tel in array.telescopes.items():
-        tel.point_to_altaz(70*u.deg, 0*u.deg)
-    tel2.point_to_altaz(0*u.deg, -90*u.deg)
-    print(array.positions_array)
-    print(array.barycenter[0])
-
-    ax = array.display_positions()
-    ax.legend()
-    plt.show()
-
-    print(array.pointing_vectors)
-
-    # from visualization import polar_stuff
-
-    # tel1.point_to_altaz(70*u.deg, np.pi*u.rad)
-    # ax = polar_stuff(plt.figure(), tel1)
-    # ax.set_xlim(50, 80)
-    # ax.set_ylim(50, 90)
-    # plt.show()
-
-
-if __name__ == "__main__":
-    main()

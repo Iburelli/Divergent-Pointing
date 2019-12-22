@@ -36,7 +36,8 @@ def alt_az_to_vector(alt, az):
 def retro_pointing(array, div, alt, az):
 
     B = array.barycenter
-    norm = - np.log(div)
+    # norm = - np.log(div)
+    norm = 1./np.tan(np.arcsin(div))
     Gx = B[0] - norm * np.cos(alt) * np.cos(az)
     Gy = B[1] - norm * np.cos(alt) * np.sin(az)
     Gz = B[2] - norm * np.sin(alt)
@@ -51,7 +52,7 @@ def tel_div_pointing(tel, G):
 def array_div_pointing(array, G):
     for ii, tel in array.telescopes.items():
         tel_div_pointing(tel, G)
-        print(tel.alt, tel.az)
+        # print(tel.alt, tel.az)
 
 def main():
     tel1 = Telescope(0 * u.m, 0 * u.m, 0 * u.m, 28 * u.m, 1 * u.m)
