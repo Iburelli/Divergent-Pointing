@@ -1,10 +1,11 @@
 import astropy.units as u
 import numpy as np
 import matplotlib.pyplot as plt
-import sys
-sys.path.insert(0, '../divtel')
-from telescope import Telescope, Array
-import pointing
+
+print(np)
+
+from divtel.telescope import Telescope, Array
+from divtel import pointing
 
 def hess_1():
     tel1 = Telescope(10*u.m, 0*u.m, 0*u.m, 20*u.m, 1*u.m)
@@ -21,6 +22,7 @@ def hess_2():
     tel4 = Telescope(0 * u.m, -10 * u.m, 0 * u.m, 20 * u.m, 1 * u.m)
     tel5 = Telescope(0 * u.m, 0 * u.m, 0 * u.m, 30 * u.m, 1 * u.m)
     return Array([tel1, tel2, tel3, tel4, tel5])
+
 
 def random_array(n=10):
     tels = [Telescope(10*np.random.rand()*u.m,
@@ -45,7 +47,7 @@ def main():
     array = hess_1()
     # array = random_array()
 
-    for k, tel in array.telescopes.items():
+    for tel in array.telescopes:
         tel.point_to_altaz(90*u.deg, 0*u.deg)
 
     # tel2.point_to_altaz(0*u.deg, -90*u.deg)
@@ -58,12 +60,12 @@ def main():
 
     # print(array.pointing_vectors)
 
-    alt = 70 * u.deg
+    alt = 40 * u.deg
     az = 0 * u.deg
     # alt = np.random.rand()*u.rad
     # az = np.random.rand()*u.rad
-    G = pointing.retro_pointing(array, 0.1, alt, az)
-    pointing.array_div_pointing(array, G)
+
+    array.divergent_pointing(0.1, alt, az)
     ax = array.display_2d(projection='xy')
     ax.legend()
     plt.show()
@@ -72,11 +74,14 @@ def main():
     print(array.barycenter)
 
 
+    ax = array.display_3d()
+    ax.set_zlim(0, 1)
+    plt.show()
 
     telescopes_distances = np.sqrt(np.sum((array.positions_array - array.barycenter)**2, axis=1))
     # print(telescopes_distances)
-    tels_alt = np.array([tel.alt.value for k, tel in array.telescopes.items()])
-    tels_az = np.array([tel.az.value for k, tel in array.telescopes.items()])
+    tels_alt = np.array([tel.alt.value for tel in array.telescopes])
+    tels_az = np.array([tel.az.value for tel in array.telescopes])
     # print(array.pointing_vectors)
     # print(tels_alt, tels_az)
     p = np.average(array.pointing_vectors, weights=telescopes_distances, axis=0)
@@ -95,6 +100,8 @@ def main():
     # ax.set_ylim(50, 90)
     # plt.show()
 
+    for tel in array.telescopes:
+        print(tel.id)
 
 if __name__ == "__main__":
     main()

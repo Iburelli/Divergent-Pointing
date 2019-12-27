@@ -10,9 +10,8 @@ Alt is taken from ground (towards Z) and between -90 and 90 degrees
 
 import numpy as np
 import astropy.units as u
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
-from telescope import Array, Telescope
 
 def alt_az_to_vector(alt, az):
     """
@@ -27,54 +26,63 @@ def alt_az_to_vector(alt, az):
     -------
     np.array([x, y, z])
     """
-    x = np.cos(alt) * np.cos(az)
-    y = np.cos(alt) * np.sin(az)
-    z = np.sin(alt)
+    x = np.cos(alt.to(u.rad)) * np.cos(az.to(u.rad))
+    y = np.cos(alt.to(u.rad)) * np.sin(az.to(u.rad))
+    z = np.sin(alt.to(u.rad))
     return np.array([x, y, z])
 
+def _norm_div(div, scale=100):
+    """
+    Transformation function from div parameter to norm to compute the position of G
 
-def retro_pointing(array, div, alt, az):
+     Parameters
+    ----------
+    div: float
+    scale: float
+        telescope distance from barycenter at which div = divergence_angle/90deg
 
-    B = array.barycenter
-    # norm = - np.log(div)
-    norm = 1./np.tan(np.arcsin(div))
-    Gx = B[0] - norm * np.cos(alt) * np.cos(az)
-    Gy = B[1] - norm * np.cos(alt) * np.sin(az)
-    Gz = B[2] - norm * np.sin(alt)
+    Returns
+    -------
+    float
+    """
+    return scale/np.tan(np.arcsin(div))
+
+def pointG_position(barycenter, div, alt_mean, az_mean):
+    """
+    Compute the position of G for the pointing
+
+    Parameters
+    ----------
+    barycenter: np.array([x,y,z])
+        position of the barycenter of the array
+    div: float
+    alt_mean: `astropy.Quantity`
+        mean pointing altitude in radians from which to diverge
+    az_mean: `astropy.Quantity`
+        mean pointing azimuth in radians from which to diverge
+
+    Returns
+    -------
+    Numpy array [Gx, Gy, Gz]
+    """
+    norm = _norm_div(div)
+    Gx = barycenter[0] - norm * np.cos(alt_mean) * np.cos(az_mean)
+    Gy = barycenter[1] - norm * np.cos(alt_mean) * np.sin(az_mean)
+    Gz = barycenter[2] - norm * np.sin(alt_mean)
     return np.array([Gx, Gy, Gz])
 
-def tel_div_pointing(tel, G):
-    GT = np.sqrt(((tel.position - G) ** 2).sum())
-    alt_tel = np.arcsin((tel.z.value - G[2]) / GT)
-    az_tel = np.arctan2((tel.y.value - G[1]), (tel.x.value - G[0]))
-    tel.point_to_altaz(alt_tel * u.rad, az_tel * u.rad)
+def tel_div_pointing(tel_position, G):
+    """
+    Divergent pointing to a point G.
+    Update telescope pointing
 
-def array_div_pointing(array, G):
-    for ii, tel in array.telescopes.items():
-        tel_div_pointing(tel, G)
-        # print(tel.alt, tel.az)
-
-def main():
-    tel1 = Telescope(0 * u.m, 0 * u.m, 0 * u.m, 28 * u.m, 1 * u.m)
-    tel2 = Telescope(1 * u.m, 0 * u.m, 0 * u.m, 28 * u.m, 1 * u.m)
-    tel3 = Telescope(0 * u.m, 1 * u.m, 0 * u.m, 28 * u.m, 1 * u.m)
-
-    div = 1e-1
-    alt = 70 * u.deg
-    az = 90 * u.deg
-
-    array = Array([tel1, tel2, tel3])
-    for k, tel in array.telescopes.items():
-        tel.point_to_altaz(alt, az)
-    array.display_positions()
-    plt.show()
-
-    G = retro_pointing(array, div, alt, az)
-
-    array_div_pointing(array, G)
-    array.display_positions()
-    plt.show()
-
-
-if __name__ == "__main__":
-    main()
+    Parameters
+    ----------
+    tel_position: np.array([x, y, z])
+        telescope coordinates
+    G: numpy.array([Gx, Gy, Gz])
+    """
+    GT = np.sqrt(((tel_position - G) ** 2).sum())
+    alt_tel = np.arcsin((tel_position[2] - G[2]) / GT)
+    az_tel = np.arctan2((tel_position[1] - G[1]), (tel_position[0] - G[0]))
+    return alt_tel, az_tel
