@@ -116,6 +116,8 @@ class Array:
         projection: str
             'xy', 'xz' or 'yz'
         ax: `matplotlib.pyplot.axes`
+        arrow_scale: float
+            scale of the telescopes arrows
         kwargs: args for `pyplot.scatter`
 
         Returns
@@ -159,13 +161,11 @@ class Array:
         else:
             breakpoint()
 
-        scale = np.max([xx, yy]) / 10.
-
-        ax.scatter(xx, yy, **kwargs, label='telescopes')
+        # ax.scatter(xx, yy, **kwargs, label='telescopes')
         ax.scatter(xb, yb, marker='+', label='barycenter')
         ax.quiver(xx, yy, xv, yv,
                   color=kwargs['color'],
-                  scale=scale,
+                  units='xy',
                   )
 
         ax.set_ylabel(ylabel)
