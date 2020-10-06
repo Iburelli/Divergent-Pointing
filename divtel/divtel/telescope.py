@@ -52,19 +52,17 @@ class Telescope:
         az_tel = np.arctan2((- self.y.value + object[1]), (- self.x.value + object[0]))
         self.point_to_altaz(alt_tel * u.rad, az_tel * u.rad)
 
-
     @property
     def pointing_vector(self):
-        # return pointing.alt_az_to_vector(self.alt, self.az)
-        return np.array([np.cos(self.alt.to(u.rad))*np.cos(self.az.to(u.rad)),
-                         np.cos(self.alt.to(u.rad))*np.sin(self.az.to(u.rad)),
-                         np.sin(self.alt.to(u.rad))])
+        return pointing.alt_az_to_vector(self.alt, self.az)
 
 
 class Array:
 
     def __init__(self, telescope_list):
         self.telescopes = telescope_list
+        self.array_pointing_alt = 0
+        self.array_pointing_az = 0
 
     @property
     def positions_array(self):
@@ -98,13 +96,15 @@ class Array:
         az_mean: `astropy.Quantity`
             mean az pointing
         """
-        if div==0:
+        self.array_pointing_alt = alt_mean
+        self.array_pointing_az = az_mean
+        if div == 0:
             for tel in self.telescopes:
                 tel.point_to_altaz(alt_mean, az_mean)
         else:
-            G = pointing.pointG_position(self.barycenter, div, alt_mean, az_mean)
+            g_point = pointing.pointG_position(self.barycenter, div, alt_mean, az_mean)
             for tel in self.telescopes:
-                alt_tel, az_tel = pointing.tel_div_pointing(tel.position, G)
+                alt_tel, az_tel = pointing.tel_div_pointing(tel.position, g_point)
                 tel.point_to_altaz(alt_tel*u.rad, az_tel*u.rad)
 
     def display_2d(self, projection='xy', ax=None, **kwargs):
@@ -178,9 +178,9 @@ class Array:
         ax.set_ylim(ylim[0] - 0.25 * np.abs(ylim[0]), ylim[1] + 0.25 * np.abs(ylim[1]))
         return ax
 
-    def display_3d(self):
+    def display_3d(self, figsize=(15, 12)):
         #TODO: fix pointing quiver length issue
-        fig = plt.figure()
+        fig = plt.figure(figsize=figsize)
         ax = fig.add_subplot(111, projection='3d')
 
         X = self.positions_array[:, 0]
@@ -203,6 +203,15 @@ class Array:
                   self.pointing_vectors[:, 2],
                   color='black',
                   length=max_range,
+                  )
+
+        mean_vec = pointing.alt_az_to_vector(self.array_pointing_alt, self.array_pointing_az)
+        ax.quiver(self.barycenter[0], self.barycenter[1], self.barycenter[2],
+                  mean_vec[0], mean_vec[1], mean_vec[2],
+                  linestyle='--',
+                  length=2*max_range,
+                  arrow_length_ratio=0.,
+                  linewidth=4,
                   )
 
         ax.set_xlabel('x [m]')
