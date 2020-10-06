@@ -57,7 +57,7 @@ class Telescope:
     def pointing_vector(self):
         # return pointing.alt_az_to_vector(self.alt, self.az)
         return np.array([np.cos(self.alt.to(u.rad))*np.cos(self.az.to(u.rad)),
-                         np.cos(self.alt.to(u.rad))*np.sin(self.az.to(u.rad)),
+                         -np.cos(self.alt.to(u.rad))*np.sin(self.az.to(u.rad)),
                          np.sin(self.alt.to(u.rad))])
 
 

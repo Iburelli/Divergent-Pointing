@@ -2,7 +2,7 @@
 Functions to define telescopes pointings
 We use the same reference frame as simtel_array:
 X is pointing North
-Y is pointing East
+Y is pointing West
 Z is pointing upward
 Az is taken clock-wise from X (towards Y) and between -180 and 180 degrees
 Alt is taken from ground (towards Z) and between -90 and 90 degrees
@@ -27,7 +27,7 @@ def alt_az_to_vector(alt, az):
     np.array([x, y, z])
     """
     x = np.cos(alt.to(u.rad)) * np.cos(az.to(u.rad))
-    y = np.cos(alt.to(u.rad)) * np.sin(az.to(u.rad))
+    y = -np.cos(alt.to(u.rad)) * np.sin(az.to(u.rad))
     z = np.sin(alt.to(u.rad))
     return np.array([x, y, z])
 
@@ -67,7 +67,7 @@ def pointG_position(barycenter, div, alt_mean, az_mean):
     """
     norm = _norm_div(div)
     Gx = barycenter[0] - norm * np.cos(alt_mean) * np.cos(az_mean)
-    Gy = barycenter[1] - norm * np.cos(alt_mean) * np.sin(az_mean)
+    Gy = barycenter[1] + norm * np.cos(alt_mean) * np.sin(az_mean)
     Gz = barycenter[2] - norm * np.sin(alt_mean)
     return np.array([Gx, Gy, Gz])
 
