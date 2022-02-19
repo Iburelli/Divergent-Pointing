@@ -1,0 +1,13 @@
+system:
+ daytime: 2020-02-07T20:00 # utc observing time in isot format
+ # if divergence field is empty all div will be studied
+ divergence: 0.0022 #0.0022,0.008,0.0043,0.0022
+ site: north
+ multiplicity_cut: 3
+
+# if star field is empty a list of default stars will be studied
+star: pollux  #delta umi #elnath
+
+header: True
+verbose: True
+outfile: FoV_test_m_cut_3  #name only, no extension
