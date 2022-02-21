@@ -331,6 +331,7 @@ class CTA_Info:
                     cmap='viridis',**kwargs)
         plt.hlines(24*u.deg,np.min(self._timestep),
                     np.max(self._timestep), label='CTA min Alt', linestyle='-.')
+
         plt.fill_between(self._timestep, 0, 90*u.deg,
                          sun.alt < -0*u.deg, color='0.5', zorder=0)
         plt.fill_between(self._timestep, 0*u.deg, 90*u.deg,
