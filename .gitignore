@@ -106,3 +106,6 @@ venv.bak/
 #localdir
 old/
 plots/
+
+#plots
+*.png
