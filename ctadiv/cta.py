@@ -61,11 +61,11 @@ class CTA_Info:
         -------
         astropy.coordinates.EarthLocation.from_geodetic
         """
-
+        
         if self.site.lower() in ('north', 'roque de los muchachos'):
-            site_coords = EarthLocation.from_geodetic('342.1184', '28.7606', 2326. * u.meter)
+            site_coords = EarthLocation.from_geodetic('342.1184', '28.7606', 2177. * u.meter)
         elif self.site.lower() in ('south', 'paranal'):
-            site_coords = EarthLocation.from_geodetic('289.5972', '-24.6253', 2635. * u.meter)
+            site_coords = EarthLocation.from_geodetic('289.5972', '-24.6253', 2162. * u.meter)
         else:
             raise Warning(f"{site} is not a valid site choice")
         return site_coords
@@ -329,8 +329,7 @@ class CTA_Info:
         plt.scatter(self._timestep, src.alt,
                     c= src.az, s=8,
                     cmap='viridis',**kwargs)
-        plt.hlines(24*u.deg,np.min(self._timestep),
-                    np.max(self._timestep), label='CTA min Alt', linestyle='-.')
+
         plt.fill_between(self._timestep, 0, 90*u.deg,
                          sun.alt < -0*u.deg, color='0.5', zorder=0)
         plt.fill_between(self._timestep, 0*u.deg, 90*u.deg,
