@@ -57,7 +57,14 @@ if cfg['star']==None:
                'aldebaran','menkar','regulus','alpha cas','mirach','hamal',
                'gamma eri','alpha and','beta per','electra','omicron uma',
                'epsilon leo','sao 6487','sao 168460','polaris','sao 136871',
-               'dubhe','merak','52 uma','54 uma','rho pup','delta umi']
+               'dubhe','merak','52 uma','54 uma','rho pup','delta umi','alpha cet',
+               #from 23.30 at least
+               '35 hya','gamma uma','alula borealis', '30 boo', 'theta leo',
+               'gamma boo', 'mizar', 'alpha com','70 vir', '79 vir',
+               #from5.00am
+               'vega','alpha oph', 'marfik', 'eta oph', 'antares', 'delta scorpio',
+               'delta her', 'gamma dra','eta dra','alpha dra', 'alpha crb','alpha ser',
+               'deneb','17 aql']
 
     elif site =='south':
         stars=['canopus', 'alpha eri', 'alpha psa', 'acrux', 'beta car',
@@ -110,108 +117,116 @@ for name in stars:
 
 
         array =  LoadConfig(config_file, frame=cta, pointing2src=True)
+        for i in range(48):
+            if array.pointing['alt'].value >=24:
 
 
-        array.divergent_pointing(div)
-        #array.hFoV(m_cut=multiplicity)
-        initial_pointing_dir=array.get_pointing_coord(icrs=True)
-        if cfg['verbose']==True:
-            print(f'\n\thFoV:{array.hFoV(m_cut=m_cut)}, average multiplicity:{array.hFoV(m_cut=m_cut,return_multiplicity=True)[1]}')
-
-        if star_altaz.alt.deg >=24:
-            results[name][div]['alt'].append(star_altaz.alt.deg)
-            results[name][div]['az'].append(star_altaz.az.deg)
-            results[name][div]['obsname'].append(cta.observer.name)
-            results[name][div]['obstime'].append(array.frame.t_obs.value)
-            results[name][div]['hFoV_track'].append(array.hFoV(m_cut=m_cut).value)
-            results[name][div]['m_ave_track'].append(array.hFoV(m_cut=m_cut,return_multiplicity=True)[1])
-            results[name][div]['hFoV_div'].append(array.hFoV(m_cut=m_cut).value)
-            results[name][div]['m_ave_div'].append(array.hFoV(m_cut=m_cut,return_multiplicity=True)[1])
-            results[name][div]['hfov_diff'].append(0)
-            results[name][div]['m_ave_diff'].append(0)
-            #results[name][div]['pointing_diff'].append(0)
-
-            details=(f'{name},{star.ra.deg},{star.dec.deg},{star_altaz.alt.deg},{star_altaz.az.deg},{array.frame.t_obs.value},{cta.observer.name},{div},{array.hFoV().value},{array.hFoV(return_multiplicity=True)[1]},initial_point')
-            append_new_line(f'plots/{outfile}.txt', details)
-
-        for dt in [10,20,30,60,120]: #
-            print('\n')
-            array.update_frame(time = daytime)
-            array.update_frame(delta_t = dt*30*u.min, verbose=True)
-
-            new_frame=array.frame.altaz
-
-            star_altaz=star.transform_to(new_frame)
-            if star_altaz.alt.deg >=24:
+                array.divergent_pointing(div)
+                #array.hFoV(m_cut=multiplicity)
+                initial_pointing_dir=array.get_pointing_coord(icrs=True)
                 if cfg['verbose']==True:
-                    print(f'\n\thFoV:{array.hFoV()}, average multiplicity:{array.hFoV(return_multiplicity=True)[1]}')
+                    print(f'\n\thFoV:{array.hFoV(m_cut=m_cut)}, average multiplicity:{array.hFoV(m_cut=m_cut,return_multiplicity=True)[1]}')
 
-                if star_altaz.alt.deg >=24:
-                    details=(f'{name},{star.ra.deg},{star.dec.deg},{star_altaz.alt.deg},{star_altaz.az.deg},{array.frame.t_obs.value},{cta.observer.name},{div},{array.hFoV().value},{array.hFoV(return_multiplicity=True)[1]},False')
-                    append_new_line(f'plots/{outfile}.txt', details)
-
-                final_pointing=initial_pointing_dir.transform_to(new_frame)
-                # --------- messy part - tracking the stars
-                polygons = {}
-                for i,pointing in enumerate(final_pointing):
-
-                    tel_alt =pointing.alt
-                    tel_az = pointing.az
-
-                    tels_points = pointing
-                    polygons[i] = Point(tels_points.az.degree, tels_points.alt.degree).buffer(array.table['radius'][i])
-
-                rings = [LineString(list(pol.exterior.coords)) for pol in polygons.values()]
-                union = unary_union(rings)
-                result = {counter:geom for counter, geom in enumerate(polygonize(union))}
-
-                ori = list(polygons.values())
-                res = list(result.values())
-
-                dict_count_overlaps = {}
-                for i in range(len(res)):
-                    dict_count_overlaps[i] = 0
-                    for j in range(len(ori)):
-                         if np.isclose(res[i].difference(ori[j]).area, 0):
-                            dict_count_overlaps[i] +=1
-                             #print(f"res_{colors[i]}, orig_{j+1}")
-
-
-                max_multiplicity = max(dict_count_overlaps.values())
-                overlaps_nocut = np.array(list(dict_count_overlaps.values()))
-                #print(len(res), len(overlaps_nocut))
-                hfov = []
-                overlaps=[]
-                for i,patchsky in enumerate(res):
-
-                    if overlaps_nocut[i]>m_cut-1:
-                        overlaps.append(overlaps_nocut[i])
-                        hfov.append(patchsky.area)
-
-                hfov = np.array(hfov) #hfov è generato come lista e viene qui convertito in array
-                # multiplicity associated with each patch
-
-
-                overlaps = np.array(overlaps)
-                average_overlap = np.average(overlaps, weights=hfov)
-                variance = np.average((overlaps-average_overlap)**2, weights=hfov)
 
                 results[name][div]['alt'].append(star_altaz.alt.deg)
                 results[name][div]['az'].append(star_altaz.az.deg)
                 results[name][div]['obsname'].append(cta.observer.name)
                 results[name][div]['obstime'].append(array.frame.t_obs.value)
-                results[name][div]['hFoV_track'].append(hfov.sum())
-                results[name][div]['m_ave_track'].append(average_overlap)
+                results[name][div]['hFoV_track'].append(array.hFoV(m_cut=m_cut).value)
+                results[name][div]['m_ave_track'].append(array.hFoV(m_cut=m_cut,return_multiplicity=True)[1])
                 results[name][div]['hFoV_div'].append(array.hFoV(m_cut=m_cut).value)
                 results[name][div]['m_ave_div'].append(array.hFoV(m_cut=m_cut,return_multiplicity=True)[1])
-                results[name][div]['hfov_diff'].append(array.hFoV(m_cut=m_cut).value-hfov.sum())
-                results[name][div]['m_ave_diff'].append(array.hFoV(m_cut=m_cut,return_multiplicity=True)[1]-average_overlap)
-                #results[name][div]['pointing_diff'].append(
-                details=(f'{name},{star.ra.deg},{star.dec.deg},{star_altaz.alt.deg},{star_altaz.az.deg},{cta.t_obs.value},{cta.observer.name},{div},{array.hFoV().value},{hfov.sum()},{average_overlap}')
+                results[name][div]['hfov_diff'].append(0)
+                results[name][div]['m_ave_diff'].append(0)
+                #results[name][div]['pointing_diff'].append(0)
+
+                details=(f'{name},{star.ra.deg},{star.dec.deg},{star_altaz.alt.deg},{star_altaz.az.deg},{array.frame.t_obs.value},{cta.observer.name},{div},{array.hFoV().value},{array.hFoV(return_multiplicity=True)[1]},initial_point')
                 append_new_line(f'plots/{outfile}.txt', details)
 
-                if cfg['verbose']==True:
-                    print(f'\thFoV:{hfov.sum()}, average multiplicity:{average_overlap}')
+
+                for dt in range(72): #
+                    print('\n')
+
+                    array.update_frame(delta_t = 20*u.min, verbose=True)
+
+                    new_frame=array.frame.altaz
+
+                    star_altaz=star.transform_to(new_frame)
+                    if star_altaz.alt.deg >=24:
+                        if cfg['verbose']==True:
+                            print(f'\n\thFoV:{array.hFoV()}, average multiplicity:{array.hFoV(return_multiplicity=True)[1]}')
+
+
+                        details=(f'{name},{star.ra.deg},{star.dec.deg},{star_altaz.alt.deg},{star_altaz.az.deg},{array.frame.t_obs.value},{cta.observer.name},{div},{array.hFoV().value},{array.hFoV(return_multiplicity=True)[1]},False')
+                        append_new_line(f'plots/{outfile}.txt', details)
+
+                        final_pointing=initial_pointing_dir.transform_to(new_frame)
+                        # --------- messy part - tracking the stars
+                        polygons = {}
+                        for i,pointing in enumerate(final_pointing):
+
+                            tel_alt =pointing.alt
+                            tel_az = pointing.az
+
+                            tels_points = pointing
+                            polygons[i] = Point(tels_points.az.degree, tels_points.alt.degree).buffer(array.table['radius'][i])
+
+                        rings = [LineString(list(pol.exterior.coords)) for pol in polygons.values()]
+                        union = unary_union(rings)
+                        result = {counter:geom for counter, geom in enumerate(polygonize(union))}
+
+                        ori = list(polygons.values())
+                        res = list(result.values())
+
+                        dict_count_overlaps = {}
+                        for i in range(len(res)):
+                            dict_count_overlaps[i] = 0
+                            for j in range(len(ori)):
+                                 if np.isclose(res[i].difference(ori[j]).area, 0):
+                                    dict_count_overlaps[i] +=1
+                                     #print(f"res_{colors[i]}, orig_{j+1}")
+
+
+                        max_multiplicity = max(dict_count_overlaps.values())
+                        overlaps_nocut = np.array(list(dict_count_overlaps.values()))
+                        #print(len(res), len(overlaps_nocut))
+                        hfov = []
+                        overlaps=[]
+                        for i,patchsky in enumerate(res):
+
+                            if overlaps_nocut[i]>m_cut-1:
+                                overlaps.append(overlaps_nocut[i])
+                                hfov.append(patchsky.area)
+
+                        hfov = np.array(hfov) #hfov è generato come lista e viene qui convertito in array
+                        # multiplicity associated with each patch
+
+
+                        overlaps = np.array(overlaps)
+                        average_overlap = np.average(overlaps, weights=hfov)
+                        variance = np.average((overlaps-average_overlap)**2, weights=hfov)
+
+                        results[name][div]['alt'].append(star_altaz.alt.deg)
+                        results[name][div]['az'].append(star_altaz.az.deg)
+                        results[name][div]['obsname'].append(cta.observer.name)
+                        results[name][div]['obstime'].append(array.frame.t_obs.value)
+                        results[name][div]['hFoV_track'].append(hfov.sum())
+                        results[name][div]['m_ave_track'].append(average_overlap)
+                        results[name][div]['hFoV_div'].append(array.hFoV(m_cut=m_cut).value)
+                        results[name][div]['m_ave_div'].append(array.hFoV(m_cut=m_cut,return_multiplicity=True)[1])
+                        results[name][div]['hfov_diff'].append(array.hFoV(m_cut=m_cut).value-hfov.sum())
+                        results[name][div]['m_ave_diff'].append(array.hFoV(m_cut=m_cut,return_multiplicity=True)[1]-average_overlap)
+                        #results[name][div]['pointing_diff'].append(
+                        details=(f'{name},{star.ra.deg},{star.dec.deg},{star_altaz.alt.deg},{star_altaz.az.deg},{cta.t_obs.value},{cta.observer.name},{div},{array.hFoV().value},{hfov.sum()},{average_overlap}')
+                        append_new_line(f'plots/{outfile}.txt', details)
+
+                        if cfg['verbose']==True:
+                            print(f'\thFoV:{hfov.sum()}, average multiplicity:{average_overlap}')
+                if array.frame.t_obs >= cta.t_obs +1*u.day:
+                    break
+            else:
+                array.update_frame(delta_t = 30*u.min, verbose=True)
+
 
 if len(stars)==1:
     np.save(f'plots/{outfile}_{stars[0]}_{daytime}.npy' , results)
