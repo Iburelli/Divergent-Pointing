@@ -34,18 +34,41 @@ with open(cf) as f:
 
 daytime=cfg['system']['daytime']
 site=cfg['system']['site']
-
+configuration=cfg['system']['configuration']
+# ------------------------------- load config_file
+if site == 'north':
+    if configuration == 'baseline':
+        config_file="./config/layout-3AL4M15-5.txt"
+    elif configuration == 'alpha':
+        config_file="./config/layout_alpha_north.txt"
+elif site == 'south':
+    if configuration == 'baseline':
+        config_file="./config/layout_paranal_HB9.txt"
+    elif configuration == 'alpha':
+        config_file="./config/layout_paranal_alpha.txt"
+# ------------------------------------------------------
 m_cut=cfg['system']['multiplicity_cut']
 outfile=cfg['outfile']
+# ------------------List of default stars
 if cfg['star']==None:
-    stars=['mirfak','errai','sirius', 'alpha cmi','pollux','epsilon umi','kochab','elnath',
-           'betelgeuse','capella','bellatrix','rigel','aldebaran','menkar','regulus',
-           'alpha cas','mirach','hamal','gamma eri','alpha and','beta per','electra',
-           'omicron uma','epsilon leo','sao 6487','sao 168460','polaris','sao 136871',
-           'dubhe','merak','52 uma','54 uma','rho pup','delta umi']
+    if site == 'north':
+        stars=['mirfak','errai','sirius', 'alpha cmi','pollux','epsilon umi',
+               'kochab','elnath', 'betelgeuse','capella','bellatrix','rigel',
+               'aldebaran','menkar','regulus','alpha cas','mirach','hamal',
+               'gamma eri','alpha and','beta per','electra','omicron uma',
+               'epsilon leo','sao 6487','sao 168460','polaris','sao 136871',
+               'dubhe','merak','52 uma','54 uma','rho pup','delta umi']
+
+    elif site =='south':
+        stars=['canopus', 'alpha eri', 'alpha psa', 'acrux', 'beta car',
+               'aspidiske', 'sirius', 'procyon', 'betelgeuse','bellatrix',
+               'rigel','aldebaran', 'capella','beta cet', 'alpha phe',
+               'theta1 eri','hamal','pleiades','beta phe', 'beta lep',
+               'delta cma', 'spica','gamma1 leo', 'gamma crv', 'beta tau',
+               'beta leo','alpha lyn', 'lmc']
 else:
     stars=[cfg['star']]
-
+# ------------------------------------------------------------------------------
 if cfg['system']['divergence']==None:
     divergence=[0.0022,0.0043,0.008,0.01135,0.01453]
 else:
@@ -86,7 +109,7 @@ for name in stars:
         print ("source:", cta.source)
 
 
-        array =  LoadConfig("./config/layout-3AL4M15-5.txt", frame=cta, pointing2src=True)
+        array =  LoadConfig(config_file, frame=cta, pointing2src=True)
 
 
         array.divergent_pointing(div)
@@ -99,7 +122,7 @@ for name in stars:
             results[name][div]['alt'].append(star_altaz.alt.deg)
             results[name][div]['az'].append(star_altaz.az.deg)
             results[name][div]['obsname'].append(cta.observer.name)
-            results[name][div]['obstime'].append(cta.t_obs.value)
+            results[name][div]['obstime'].append(array.frame.t_obs.value)
             results[name][div]['hFoV_track'].append(array.hFoV(m_cut=m_cut).value)
             results[name][div]['m_ave_track'].append(array.hFoV(m_cut=m_cut,return_multiplicity=True)[1])
             results[name][div]['hFoV_div'].append(array.hFoV(m_cut=m_cut).value)
@@ -108,15 +131,15 @@ for name in stars:
             results[name][div]['m_ave_diff'].append(0)
             #results[name][div]['pointing_diff'].append(0)
 
-            details=(f'{name},{star.ra.deg},{star.dec.deg},{star_altaz.alt.deg},{star_altaz.az.deg},{cta.t_obs.value},{cta.observer.name},{div},{array.hFoV().value},{array.hFoV(return_multiplicity=True)[1]},initial_point')
+            details=(f'{name},{star.ra.deg},{star.dec.deg},{star_altaz.alt.deg},{star_altaz.az.deg},{array.frame.t_obs.value},{cta.observer.name},{div},{array.hFoV().value},{array.hFoV(return_multiplicity=True)[1]},initial_point')
             append_new_line(f'plots/{outfile}.txt', details)
 
-        for dt in [10,20,30,60,120,180,240,300,360,420,480]: #range(1,48):#
+        for dt in [10,20,30,60,120]: #
             print('\n')
             array.update_frame(time = daytime)
-            array.update_frame(delta_t = dt*u.min, verbose=True)
+            array.update_frame(delta_t = dt*30*u.min, verbose=True)
 
-            new_frame=cta.altaz
+            new_frame=array.frame.altaz
 
             star_altaz=star.transform_to(new_frame)
             if star_altaz.alt.deg >=24:
@@ -124,7 +147,7 @@ for name in stars:
                     print(f'\n\thFoV:{array.hFoV()}, average multiplicity:{array.hFoV(return_multiplicity=True)[1]}')
 
                 if star_altaz.alt.deg >=24:
-                    details=(f'{name},{star.ra.deg},{star.dec.deg},{star_altaz.alt.deg},{star_altaz.az.deg},{cta.t_obs.value},{cta.observer.name},{div},{array.hFoV().value},{array.hFoV(return_multiplicity=True)[1]},False')
+                    details=(f'{name},{star.ra.deg},{star.dec.deg},{star_altaz.alt.deg},{star_altaz.az.deg},{array.frame.t_obs.value},{cta.observer.name},{div},{array.hFoV().value},{array.hFoV(return_multiplicity=True)[1]},False')
                     append_new_line(f'plots/{outfile}.txt', details)
 
                 final_pointing=initial_pointing_dir.transform_to(new_frame)
@@ -176,7 +199,7 @@ for name in stars:
                 results[name][div]['alt'].append(star_altaz.alt.deg)
                 results[name][div]['az'].append(star_altaz.az.deg)
                 results[name][div]['obsname'].append(cta.observer.name)
-                results[name][div]['obstime'].append(cta.t_obs.value)
+                results[name][div]['obstime'].append(array.frame.t_obs.value)
                 results[name][div]['hFoV_track'].append(hfov.sum())
                 results[name][div]['m_ave_track'].append(average_overlap)
                 results[name][div]['hFoV_div'].append(array.hFoV(m_cut=m_cut).value)
