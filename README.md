@@ -11,5 +11,7 @@ Directory with libraries for the cose
 The Tutorial notebooks you find here offer an overview of the code. The python script test.py (to be run toghether with its configuration file config.yaml) is a .py version of notebook Tutorial_3*.ipynb
 
 # To DO
-Solve code issue with az positions
+
 Check output files: not sure that the pointing az is defined in the right way (according to simtel standards)
+Add a warning for times: the scripts work with UTC times, not local ones (paranal = UTC - 3h)
+Create default input configurations for alpha and baseline config (missing alpha north, soon solved)
