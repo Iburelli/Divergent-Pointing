@@ -57,14 +57,12 @@ if cfg['star']==None:
                'aldebaran','menkar','regulus','alpha cas','mirach','hamal',
                'gamma eri','alpha and','beta per','electra','omicron uma',
                'epsilon leo','sao 6487','sao 168460','polaris','sao 136871',
-               'dubhe','merak','52 uma','54 uma','rho pup','delta umi','alpha cet',
-               #from 23.30 at least
-               '35 hya','gamma uma','alula borealis', '30 boo', 'theta leo',
-               'gamma boo', 'mizar', 'alpha com','70 vir', '79 vir',
-               #from5.00am
-               'vega','alpha oph', 'marfik', 'eta oph', 'antares', 'delta scorpio',
-               'delta her', 'gamma dra','eta dra','alpha dra', 'alpha crb','alpha ser',
-               'deneb','17 aql']
+               'dubhe','merak','52 uma','54 uma','rho pup','delta umi',
+               'alpha cet','35 hya','gamma uma','alula borealis', '30 boo',
+               'theta leo','gamma boo', 'mizar', 'alpha com','70 vir', '79 vir',
+               'vega','alpha oph', 'marfik', 'eta oph', 'antares','79 vir',
+               'delta her', 'gamma dra','eta dra','alpha dra', 'alpha crb',
+               'alpha ser','delta scorpio','deneb','17 aql']
 
     elif site =='south':
         stars=['canopus', 'alpha eri', 'alpha psa', 'acrux', 'beta car',
@@ -131,8 +129,8 @@ for name in stars:
             print(f'\n\thFoV:{array.hFoV(m_cut=m_cut)}, average multiplicity:{array.hFoV(m_cut=m_cut,return_multiplicity=True)[1]}')
 
 
-        results[name][div]['alt'].append(star_altaz.alt.deg)
-        results[name][div]['az'].append(star_altaz.az.deg)
+        results[name][div]['alt'].append(cta.source.alt.deg)
+        results[name][div]['az'].append(cta.source.az.deg)
         results[name][div]['obsname'].append(cta.observer.name)
         results[name][div]['obstime'].append(array.frame.t_obs.value)
         results[name][div]['hFoV_track'].append(array.hFoV(m_cut=m_cut).value)
@@ -214,8 +212,8 @@ for name in stars:
                 average_overlap = np.average(overlaps, weights=hfov)
                 variance = np.average((overlaps-average_overlap)**2, weights=hfov)
 
-                results[name][div]['alt'].append(star_altaz.alt.deg)
-                results[name][div]['az'].append(star_altaz.az.deg)
+                results[name][div]['alt'].append(array.pointing['alt'].deg)
+                results[name][div]['az'].append(array.pointing['az'].deg)
                 results[name][div]['obsname'].append(cta.observer.name)
                 results[name][div]['obstime'].append(array.frame.t_obs.value)
                 results[name][div]['hFoV_track'].append(hfov.sum())
