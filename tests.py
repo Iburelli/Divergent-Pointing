@@ -114,13 +114,18 @@ for name in stars:
 
         cta.set_source_loc(ra=star.ra, dec=star.dec)
         print ("source:", cta.source)
-
-
-        array =  LoadConfig(config_file, frame=cta, pointing2src=True)
         for i in range(48):
-            if array.pointing['alt'].value >=24:
+            if cta.source.alt<=24*u.deg:
+                #print(cta.source.alt.deg)
+                cta.update(delta_t = 30*u.min)
+                cta.set_source_loc(ra=star.ra, dec=star.dec)
 
+            else:
+                #print(cta.t_obs)
 
+                #pointing to source
+                array =  LoadConfig(config_file, frame=cta, pointing2src=True)
+                #apply divergence
                 array.divergent_pointing(div)
                 #array.hFoV(m_cut=multiplicity)
                 initial_pointing_dir=array.get_pointing_coord(icrs=True)
@@ -143,8 +148,7 @@ for name in stars:
                 details=(f'{name},{star.ra.deg},{star.dec.deg},{star_altaz.alt.deg},{star_altaz.az.deg},{array.frame.t_obs.value},{cta.observer.name},{div},{array.hFoV().value},{array.hFoV(return_multiplicity=True)[1]},initial_point')
                 append_new_line(f'plots/{outfile}.txt', details)
 
-
-                for dt in range(72): #
+                for dt in range(6): #
                     print('\n')
 
                     array.update_frame(delta_t = 20*u.min, verbose=True)
@@ -222,10 +226,9 @@ for name in stars:
 
                         if cfg['verbose']==True:
                             print(f'\thFoV:{hfov.sum()}, average multiplicity:{average_overlap}')
+
                 if array.frame.t_obs >= cta.t_obs +1*u.day:
                     break
-            else:
-                array.update_frame(delta_t = 30*u.min, verbose=True)
 
 
 if len(stars)==1:
