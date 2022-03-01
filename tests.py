@@ -105,7 +105,7 @@ for name in stars:
         cta.update(delta_t = 30*u.min)
         cta.set_source_loc(ra=star.ra, dec=star.dec)
 
-
+    print(f'start time: {cta.t_obs}')
     #print ("source:", cta.source)v_div{div}
     for div in divergence:
         print (f'\n\tdivergence:{div}')
@@ -120,13 +120,6 @@ for name in stars:
         results[name][div]['m_ave_div']=[]
         results[name][div]['hfov_diff']=[]
         results[name][div]['m_ave_diff']=[]
-        #results[name][div]['pointing_diff']=[]
-
-
-
-
-        #vis[name]=True
-        #print(cta.t_obs)
 
         #pointing to source
         array =  LoadConfig(config_file, frame=cta, pointing2src=True)
@@ -238,8 +231,8 @@ for name in stars:
                 if cfg['verbose']==True:
                     print(f'\thFoV:{hfov.sum()}, average multiplicity:{average_overlap}')
 
-            if array.frame.t_obs >= cta.t_obs +1*u.day:
-                break
+            '''if array.frame.t_obs >= cta.t_obs +1*u.day:
+                break'''
 
 
 if len(stars)==1:
