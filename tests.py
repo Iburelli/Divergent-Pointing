@@ -205,8 +205,6 @@ for name in stars:
                         hfov.append(patchsky.area)
 
                 hfov = np.array(hfov) 
-
-
                 overlaps = np.array(overlaps)
                 average_overlap = np.average(overlaps, weights=hfov)
                 variance = np.average((overlaps-average_overlap)**2, weights=hfov)
