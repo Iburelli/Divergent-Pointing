@@ -204,8 +204,7 @@ for name in stars:
                         overlaps.append(overlaps_nocut[i])
                         hfov.append(patchsky.area)
 
-                hfov = np.array(hfov) #hfov è generato come lista e viene qui convertito in array
-                # multiplicity associated with each patch
+                hfov = np.array(hfov) 
 
 
                 overlaps = np.array(overlaps)
@@ -229,8 +228,7 @@ for name in stars:
                 if cfg['verbose']==True:
                     print(f'\thFoV:{hfov.sum()}, average multiplicity:{average_overlap}')
 
-            '''if array.frame.t_obs >= cta.t_obs +1*u.day:
-                break'''
+
 
 
 if len(stars)==1:
