@@ -104,7 +104,7 @@ for name in stars:
 
         cta.update(delta_t = 30*u.min)
         cta.set_source_loc(ra=star.ra, dec=star.dec)
-        
+
 
     #print ("source:", cta.source)v_div{div}
     for div in divergence:
@@ -173,12 +173,18 @@ for name in stars:
                 # --------- messy part - tracking the stars
                 polygons = {}
                 for i,pointing in enumerate(final_pointing):
-
-                    tel_alt =pointing.alt
-                    tel_az = pointing.az
-
                     tels_points = pointing
-                    polygons[i] = Point(tels_points.az.degree, tels_points.alt.degree).buffer(array.table['radius'][i])
+                    if max(final_pointing[:].az.deg)-min(final_pointing[:].az.deg) > 180:
+
+
+                        if tels_points.az.degree < 180:
+                            polygons[i]=(Point(tels_points.az.degree, tels_points.alt.degree).buffer(array.table["radius"][i]))
+                        else:
+                            polygons[i]=(Point(tels_points.az.degree-360, tels_points.alt.degree).buffer(array.table["radius"][i]))
+
+                    else:
+
+                        polygons[i] = Point(tels_points.az.degree, tels_points.alt.degree).buffer(array.table['radius'][i])
 
                 rings = [LineString(list(pol.exterior.coords)) for pol in polygons.values()]
                 union = unary_union(rings)
