@@ -1,14 +1,13 @@
 system:
- daytime: 2020-02-07T23:00 # utc observing time in isot format PARANAL time = UTC -3h
- # if divergence field is empty all div will be studied
- divergence:  #0.0022 #0.0022,0.008,0.0043,0.0022
- site: south
- configuration: baseline
- multiplicity_cut: 0
+ daytime: 2020-02-07T20:00 # utc observing time in isot format PARANAL time = UTC -3h
+ divergence:  #0.0022 #0.0022,0.008,0.0043,0.0022    # if divergence field is empty all div will be studied
+ site: north
+ configuration: baseline #can be baseline or alpha
+  multiplicity_cut: 0
 
-# if star field is empty a list of default stars will be studied
-star: #pollux  #delta umi #elnath
 
-header: True
+star:            # if star field is empty a list of default stars will be studied
+obs_hours: 8     #number of observing hours (don't leave empty)
+header: True   #create header for txt file?
 verbose: True
-outfile: FoV_test_south  #name only, no extension
+outfile: FoV_preliminary_north_20min  #name only, no extension
