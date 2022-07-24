@@ -1,4 +1,4 @@
-name: eschool2021
+name: divergent
 channels:
   - default
   - conda-forge
